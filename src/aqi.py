@@ -1,18 +1,45 @@
 import sys
 import json
 import requests
-import requests_cache
 
 API_KEY = sys.argv[1]
 
 items = []
 
+
+def main():
+    aqi_result = get_aqi_by_ip()
+
+    aqi_index = aqi_result[0]
+    aqi_description = get_aqi_description(aqi_index)
+
+    update_time = aqi_result[1]
+    timezone = aqi_result[2]
+    url = aqi_result[3]
+    city_name = aqi_result[4]
+
+    # To-DO: UnicodeEncodeError station_name
+    # title = "[{0}] {1}".format(str(aqi_index), station_name)
+
+    title = str(aqi_index) + " @ " + city_name
+
+    subtitle = "{0}, {1} GMT{2}"\
+        .format(aqi_description, update_time, timezone)
+
+    icon = {"type": "png", "path": "aqi_index_scale_color/" +
+            aqi_description + ".png"}
+
+    add_item(title, subtitle, icon, url)
+
+    alfred_item_string = {"items": items}
+    print(json.dumps(alfred_item_string))
+
+
 def get_aqi_by_ip():
     url_format = 'https://api.waqi.info/feed/here/?token={0}'
     url = url_format.format(API_KEY)
 
-    with requests_cache.disabled():
-        response = requests.get(url)
+    response = requests.get(url)
 
     if response.json()['status'] == 'ok':
         data = response.json()['data']
@@ -29,40 +56,8 @@ def get_aqi_by_ip():
             aqi_result = [0, update_time, timezone, url, city_name]
         return aqi_result
     else:
-        print(json.dumps({"items": [{"title": "Error", "subtitle": data}]}))
-
-def main():
-    requests_cache.install_cache(
-        'stations_cache',
-        backend='sqlite',
-        expire_after=1296000
-    )
-
-    aqi_result = get_aqi_by_ip()
-
-    aqi_index = aqi_result[0]
-    aqi_description = get_aqi_description(aqi_index)
-
-    update_time = aqi_result[1]
-    timezone = aqi_result[2]
-    url = aqi_result[3]
-    city_name = aqi_result[4]
-
-    #To-DO: UnicodeEncodeError station_name
-    # title = "[{0}] {1}".format(str(aqi_index), station_name)
-
-    title = str(aqi_index) + " @ " + city_name
-
-    subtitle = "{0}, {1} GMT{2}"\
-        .format(aqi_description, update_time, timezone)
-
-    icon = {"type": "png", "path": "aqi_index_scale_color/"\
-        + aqi_description + ".png"}
-
-    add_item(title, subtitle, icon, url)
-
-    alfred_item_string = {"items": items}
-    print(json.dumps(alfred_item_string))
+        data = {"items": [{"title": "Error", "subtitle": data}]}
+        print(json.dumps(data))
 
 
 def get_aqi_description(aqi_index):
