@@ -1,6 +1,8 @@
 # AQI Alfred Workflow
 Alfred workflow for getting AQI info from aqicn.org
 
+![AQI Alfred Workflow Screenshot](https://github.com/xyb994/aqi-alfred-workflow/blob/master/aqi.gif)
+
 ## Setup
 - Get your own aqicn.org token at [http://aqicn.org/data-platform/token/](http://aqicn.org/data-platform/token/)
 - In AQI Alfred Workflow's script filter, replace ```API_KEY``` with the token you got
